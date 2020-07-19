@@ -1,0 +1,11 @@
+src/main.rs
+src/app.rs
+src/dialog.rs
+Cargo.toml
+
+# ~/app/rs/iup/MANIFEST
+
+st.sh
+run.py
+
+# vim: syn=yaml

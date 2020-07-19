@@ -1,0 +1,13 @@
+[package]
+name = "helloiup"
+version = "0.1.0"
+authors = ["mark-summerfield <mark@qtrac.eu>"]
+edition = "2018"
+
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+
+[dependencies]
+iup = {path = "../iup"}
