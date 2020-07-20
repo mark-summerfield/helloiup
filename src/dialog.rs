@@ -1,14 +1,9 @@
 // Copyright © 2020 Mark Summerfield. All rights reserved.
 
+use crate::prelude::*;
+use crate::action::{on_ticker, on_timer, maybe_save, on_version, on_quit};
 use iup::{Ihandle, IUP};
-use std::ffi::c_void;
 
-const DIALOG: &str = ":DIALOG";
-const LABEL: &str = ":LABEL";
-const TIMER: &str = ":TIMER";
-const TICKER: &str = ":TICKER";
-const TICKING_ON: i32 = 1;
-const TICKING_OFF: i32 = 0;
 
 pub struct Dialog {
     pub dialog: *mut Ihandle,
@@ -21,8 +16,8 @@ pub struct Dialog {
 }
 
 impl Dialog {
-    pub fn empty() -> Self {
-        Dialog {
+    pub fn new() -> Self {
+        let mut dialog = Dialog {
             dialog: IUP.null_ihandle(),
             label: IUP.null_ihandle(),
             ticker_button: IUP.null_ihandle(),
@@ -30,22 +25,13 @@ impl Dialog {
             version_button: IUP.null_ihandle(),
             quit_button: IUP.null_ihandle(),
             timer: IUP.null_ihandle(),
-        }
-    }
-
-    pub fn build(&mut self) {
-        self.make_widgets();
-        self.make_layout();
-        self.make_bindings();
-        self.make_timer();
-        self.make_attributes();
-    }
-
-    fn make_timer(&mut self) {
-        self.timer = IUP.timer();
-        IUP.set_int(self.timer, &TICKER, TICKING_OFF);
-        IUP.set_int(self.timer, iup::TIME, 300); // 300ms
-        IUP.set_callback(self.timer, iup::ACTION_CB, on_timer);
+        };
+        dialog.make_widgets();
+        dialog.make_layout();
+        dialog.make_bindings();
+        dialog.make_timer();
+        dialog.make_attributes();
+        dialog
     }
 
     fn make_widgets(&mut self) {
@@ -72,70 +58,25 @@ impl Dialog {
 
     fn make_bindings(&mut self) {
         IUP.set_callback(self.ticker_button, iup::ACTION, on_ticker);
-        IUP.set_callback(self.save_button, iup::ACTION, on_save);
+        IUP.set_callback(self.save_button, iup::ACTION, maybe_save);
         IUP.set_callback(self.version_button, iup::ACTION, on_version);
         IUP.set_callback(self.quit_button, iup::ACTION, on_quit);
     }
 
+    fn make_timer(&mut self) {
+        self.timer = IUP.timer();
+        IUP.set_int(self.timer, &TICKER, FALSE);
+        IUP.set_int(self.timer, iup::TIME, 300); // 300ms
+        IUP.set_callback(self.timer, iup::ACTION_CB, on_timer);
+    }
+
     fn make_attributes(&mut self) {
-        IUP.set_attribute_ptr(self.dialog, &LABEL,
-                              self.label as *mut c_void);
-        IUP.set_attribute_ptr(self.dialog, &TIMER,
-                              self.timer as *mut c_void);
-        IUP.set_attribute_ptr(self.timer, &LABEL,
-                              self.label as *mut c_void);
+        // NOTE In a real application this would start as FALSE, but we want
+        // to be able to test it in this example application.
+        IUP.set_int(self.dialog, &UNSAVED_CHANGES, TRUE);
+
+        IUP.set_ih(self.dialog, &LABEL, self.label);
+        IUP.set_ih(self.dialog, &TIMER, self.timer);
+        IUP.set_ih(self.timer, &LABEL, self.label);
     }
 }
-
-pub fn save() {
-    println!("save()");
-}
-
-extern "C" fn on_ticker(ih: *mut Ihandle) -> i32 {
-    let dialog = IUP.get_dialog_child(ih, &DIALOG);
-    let label = IUP.get_attribute_ptr(ih, &LABEL) as *mut Ihandle;
-    let timer = IUP.get_attribute_ptr(ih, &TIMER) as *mut Ihandle;
-    let mut ticking = IUP.get_int(timer, &TICKER);
-    if ticking == TICKING_ON {
-        IUP.set_attribute(timer, iup::RUN, iup::NO);
-        IUP.set_int(timer, &TICKER, TICKING_OFF);
-    } else {
-        IUP.set_attribute(timer, iup::RUN, iup::YES);
-        IUP.set_int(timer, &TICKER, TICKING_ON);
-    }
-    ticking = !ticking;
-    IUP.set_attribute(label, iup::TITLE,
-                      if ticking == TICKING_ON { "Timer ON" }
-                      else { "Timer OFF" });
-    IUP.message("OK — Hello", "Changed label");
-    IUP.set_attribute(dialog, iup::BRINGFRONT, iup::YES);
-    iup::DEFAULT
-}
-
-extern "C" fn on_timer(ih: *mut Ihandle) -> i32 {
-    let label = IUP.get_attribute_ptr(ih, &LABEL) as *mut Ihandle;
-    match IUP.get_attribute(label, iup::TITLE) {
-        Some(text) => {
-            let title = if text.starts_with("Timer") {
-                "|".to_string()
-            } else {
-                format!("{}|", text)
-            };
-            IUP.set_attribute(label, iup::TITLE, &title);
-        }
-        None => println!("Failed to retrieve label text"),
-    }
-    iup::DEFAULT
-}
-
-extern "C" fn on_save(_ih: *mut Ihandle) -> i32 {
-    save();
-    iup::DEFAULT
-}
-
-extern "C" fn on_version(_ih: *mut Ihandle) -> i32 {
-    IUP.version_show();
-    iup::DEFAULT
-}
-
-extern "C" fn on_quit(_ih: *mut Ihandle) -> i32 { iup::CLOSE }

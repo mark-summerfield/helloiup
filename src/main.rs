@@ -1,12 +1,21 @@
 // Copyright © 2020 Mark Summerfield. All rights reserved.
 #![windows_subsystem = "windows"]
 
-mod app;
+mod action;
 mod dialog;
+mod prelude;
 
-use crate::app::App;
+use crate::action::maybe_save;
+use crate::dialog::Dialog;
+use iup::IUP;
 
 fn main() {
-    let mut app = App::new();
-    app.run();
+    let dialog = Dialog::new();
+    if IUP.show_xy(dialog.dialog, iup::MOUSEPOS, iup::MOUSEPOS) {
+        IUP.main_loop();
+        maybe_save(dialog.dialog);
+    } else {
+        println!("Failed to show main window");
+    }
+    IUP.close();
 }

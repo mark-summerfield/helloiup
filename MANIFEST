@@ -1,6 +1,7 @@
 src/main.rs
-src/app.rs
 src/dialog.rs
+src/action.rs
+src/prelude.rs
 Cargo.toml
 
 # ~/app/rs/iup/MANIFEST
