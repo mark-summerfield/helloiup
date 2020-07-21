@@ -6,6 +6,7 @@ Cargo.toml
 
 # ~/app/rs/iup/MANIFEST
 
+README.md
 st.sh
 run.py
 
