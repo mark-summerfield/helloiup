@@ -32,7 +32,13 @@ if reply.returncode == 0: # built
         shutil.copy2(f'{TARGET_DIR}\\release\\{EXE}', DIST)
         iup = r'R:\rs\iup\iup\windows'
         shutil.copytree(iup, f'{DIST}/iup/windows/')
-        subprocess.run(f'{DIST}/{EXE}')
+        exe = f'{DIST}/{EXE}'
+        try:
+            subprocess.run(['rcedit.exe', exe, '--set-icon',
+                            'images\\icon.ico'])
+        except FileNotFoundError:
+            print("Can't find rcedit.exe so can't add icon to .exe")
+        subprocess.run(exe)
     else:
         shutil.copy2(f'target/release/{APP}', DIST)
         iup = pathlib.Path.home() / 'app/rs/iup/iup/linux'

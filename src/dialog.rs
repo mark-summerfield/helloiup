@@ -4,7 +4,8 @@
 use crate::prelude::*;
 use crate::action::{on_ticker, on_timer, maybe_save, on_version, on_quit};
 use iup::{Ihandle, IUP};
-
+use std::env;
+use std::path::PathBuf;
 
 pub struct Dialog {
     pub dialog: *mut Ihandle,
@@ -58,6 +59,11 @@ impl Dialog {
         self.dialog = IUP.dialog(vbox);
         IUP.set_attribute(self.dialog, iup::NAME, &DIALOG);
         IUP.set_attribute(self.dialog, iup::TITLE, "Hello Rust IUP");
+        /* // Can't figure out how to dynamically load the IM library
+        let exe = env::current_exe().unwrap_or(PathBuf::from("."));
+        let image = exe.parent().unwrap_or(&exe).join("images/icon.png");
+        let icon = IM.load_image(&image.as_path().to_string_lossy());
+        */
     }
 
     fn make_bindings(&mut self) {
