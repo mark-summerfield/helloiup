@@ -4,8 +4,8 @@
 use crate::prelude::*;
 use crate::action::{on_ticker, on_timer, maybe_save, on_version, on_quit};
 use iup::{Ihandle, IUP};
-use std::env;
-use std::path::PathBuf;
+// use std::env;
+// use std::path::PathBuf;
 
 pub struct Dialog {
     pub dialog: *mut Ihandle,
