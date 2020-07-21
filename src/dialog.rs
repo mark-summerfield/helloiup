@@ -36,7 +36,10 @@ impl Dialog {
     }
 
     fn make_widgets(&mut self) {
-        self.label = IUP.label("Hello Rust IUP");
+        let system = IUP.get_global(iup::SYSTEM);
+        let system_version = IUP.get_global(iup::SYSTEMVERSION);
+        self.label = IUP.label(&format!("Hello Rust IUP on\n{} {}",
+                                        &system, &system_version));
         self.ticker_button = IUP.button("&Ticker", "");
         self.save_button = IUP.button("&Save", "");
         self.version_button = IUP.button("&Version", "");
