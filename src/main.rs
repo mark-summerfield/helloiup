@@ -8,9 +8,10 @@ mod prelude;
 
 use crate::action::maybe_save;
 use crate::dialog::Dialog;
-use iup::IUP;
+use iup::{set_library_path, IUP};
 
 fn main() {
+    set_library_path();
     let dialog = Dialog::new();
     if IUP.show_xy(dialog.dialog, iup::MOUSEPOS, iup::MOUSEPOS) {
         IUP.main_loop();
@@ -20,3 +21,4 @@ fn main() {
     }
     IUP.close();
 }
+
